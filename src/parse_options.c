@@ -174,6 +174,8 @@ void DecodeDirective(char *line, IOR_param_t *params)
                 params->fsync = atoi(value);
         } else if (strcasecmp(option, "randomoffset") == 0) {
                 params->randomOffset = atoi(value);
+        } else if (strcasecmp(option, "applicationMemory") == 0) {
+                params->applicationMemory = StringToBytes(value);
         } else if (strcasecmp(option, "lustrestripecount") == 0) {
 #ifndef HAVE_LUSTRE_LUSTRE_USER_H
                 ERR("ior was not compiled with Lustre support");
@@ -338,7 +340,7 @@ IOR_test_t *ReadConfigScript(char *scriptName)
 IOR_test_t *ParseCommandLine(int argc, char **argv)
 {
         static const char *opts =
-          "A:a:b:BcCQ:ZX:d:D:YeEf:FgG:hHi:j:J:IkKlmnN:o:O:pPqrRs:St:T:uU:vVwWxz";
+          "A:a:b:BcCQ:ZX:d:D:YeEf:FgG:hHi:j:J:IkKlmM:nN:o:O:pPqrRs:St:T:uU:vVwWxz";
         int c, i;
         static IOR_test_t *tests = NULL;
 
@@ -434,6 +436,9 @@ IOR_test_t *ParseCommandLine(int argc, char **argv)
                         break;
                 case 'l':
                         initialTestParams.storeFileOffset = TRUE;
+                        break;
+		case 'M':
+                        initialTestParams.applicationMemory = StringToBytes(optarg);
                         break;
                 case 'm':
                         initialTestParams.multiFile = TRUE;
