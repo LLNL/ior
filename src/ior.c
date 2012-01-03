@@ -206,6 +206,7 @@ void init_IOR_Param_t(IOR_param_t * p)
         p->testComm = MPI_COMM_WORLD;
         p->setAlignment = 1;
         p->lustre_start_ost = -1;
+      	p->applicationMemory = 0;
 }
 
 /*
@@ -1541,6 +1542,8 @@ static void ShowSetup(IOR_param_t *params)
         }
         fprintf(stdout, "\tclients            = %d (%d per node)\n",
                 params->numTasks, params->tasksPerNode);
+        fprintf(stdout, "\tapplicationMemory  = %s\n",
+                HumanReadable(params->applicationMemory, BASE_TWO));
         fprintf(stdout, "\trepetitions        = %d\n", params->repetitions);
         fprintf(stdout, "\txfersize           = %s\n",
                 HumanReadable(params->transferSize, BASE_TWO));
@@ -1584,6 +1587,7 @@ static void ShowTest(IOR_param_t * test)
                 test->outlierThreshold);
         fprintf(stdout, "\t%s=%s\n", "options", test->options);
         fprintf(stdout, "\t%s=%d\n", "nodes", test->nodes);
+        fprintf(stdout, "\t%s=%lu\n", "applicationMemory", (unsigned long) test->applicationMemory);
         fprintf(stdout, "\t%s=%d\n", "tasksPerNode", tasksPerNode);
         fprintf(stdout, "\t%s=%d\n", "repetitions", test->repetitions);
         fprintf(stdout, "\t%s=%d\n", "multiFile", test->multiFile);
@@ -1859,6 +1863,10 @@ static void TestIoSys(IOR_test_t *test)
         MPI_Group orig_group, new_group;
         int range[3];
         IOR_offset_t dataMoved; /* for data rate calculation */
+	char *applicationMemory=NULL;
+	char error_message[100];
+	unsigned long mem_writer;
+	char *ptr;
 
         /* set up communicator for test */
         if (params->numTasks > numTasksWorld) {
@@ -1910,6 +1918,26 @@ static void TestIoSys(IOR_test_t *test)
         /* show test setup */
         if (rank == 0 && verbose >= VERBOSE_0)
                 ShowSetup(params);
+
+	    /* allocate some additional (wasted/application) memory and 
+           initialize it so that the pages are claimed 
+         */
+        if( params->applicationMemory>0 )
+	    {
+			if((applicationMemory = (char *) malloc(params->applicationMemory)) == NULL)
+			{
+				snprintf( error_message, 100, "Unable to allocate %lu bytes application memory",
+									  (unsigned long) params->applicationMemory);
+				error_message[99]=0;
+						ERR( error_message );
+			}
+			ptr=applicationMemory;
+			for( mem_writer=0; mem_writer<params->applicationMemory; mem_writer++)
+				{	
+					*ptr=(char)(mem_writer%256);
+					ptr++;	 
+				}
+	    }
 
         startTime = GetTimeStamp();
         maxTimeDuration = params->maxTimeDuration * 60;   /* convert to seconds */
@@ -2336,6 +2364,11 @@ static void TestIoSys(IOR_test_t *test)
         }
         /* Sync with the tasks that did not participate in this test */
         MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD), "barrier error");
+
+	if( applicationMemory!=NULL )
+	{
+		free( applicationMemory );
+	}
 }
 
 /*
