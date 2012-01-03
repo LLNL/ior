@@ -103,6 +103,7 @@ static double TimeDeviation(void);
 static void ValidTests(IOR_param_t *);
 static IOR_offset_t WriteOrRead(IOR_param_t *, void *, int);
 static void WriteTimes(IOR_param_t *, double **, int, int);
+static char *AllocMemoryPerTask(IOR_param_t *);
 
 /********************************** M A I N ***********************************/
 
@@ -206,6 +207,7 @@ void init_IOR_Param_t(IOR_param_t * p)
         p->testComm = MPI_COMM_WORLD;
         p->setAlignment = 1;
         p->lustre_start_ost = -1;
+      	p->memoryPerTask = 0;
 }
 
 /*
@@ -1541,6 +1543,8 @@ static void ShowSetup(IOR_param_t *params)
         }
         fprintf(stdout, "\tclients            = %d (%d per node)\n",
                 params->numTasks, params->tasksPerNode);
+        fprintf(stdout, "\tmemoryPerTask      = %s\n",
+                HumanReadable(params->memoryPerTask, BASE_TWO));
         fprintf(stdout, "\trepetitions        = %d\n", params->repetitions);
         fprintf(stdout, "\txfersize           = %s\n",
                 HumanReadable(params->transferSize, BASE_TWO));
@@ -1584,6 +1588,7 @@ static void ShowTest(IOR_param_t * test)
                 test->outlierThreshold);
         fprintf(stdout, "\t%s=%s\n", "options", test->options);
         fprintf(stdout, "\t%s=%d\n", "nodes", test->nodes);
+        fprintf(stdout, "\t%s=%lu\n", "memoryPerTask", (unsigned long) test->memoryPerTask);
         fprintf(stdout, "\t%s=%d\n", "tasksPerNode", tasksPerNode);
         fprintf(stdout, "\t%s=%d\n", "repetitions", test->repetitions);
         fprintf(stdout, "\t%s=%d\n", "multiFile", test->multiFile);
@@ -1844,6 +1849,36 @@ static void PrintShortSummary(IOR_test_t * test)
 	}
 }
 
+
+static char *AllocMemoryPerTask(IOR_param_t *params)
+{
+        size_t pageSize;
+	    char *memory=NULL;
+	    char error_message[100];
+	    unsigned long mem_writer;
+	    char *ptr;
+
+        pageSize = getpagesize();
+        if( params->memoryPerTask>0 )
+	    {
+			if((memory = (char *) malloc(params->memoryPerTask)) == NULL)
+			{
+				snprintf( error_message, 100, "Unable to allocate %lu bytes application memory",
+									  (unsigned long) params->memoryPerTask);
+				error_message[99]=0;
+						ERR( error_message );
+			}
+			ptr=memory;
+			for( mem_writer=0; mem_writer<params->memoryPerTask; mem_writer+=pageSize)
+			{	
+					*ptr=(char)(mem_writer%256);
+					ptr++;	 
+			}
+	    }
+
+		return memory;
+}
+
 /*
  * Using the test parameters, run iteration(s) of single test.
  */
@@ -1859,6 +1894,7 @@ static void TestIoSys(IOR_test_t *test)
         MPI_Group orig_group, new_group;
         int range[3];
         IOR_offset_t dataMoved; /* for data rate calculation */
+		char *memoryPerTask=NULL;
 
         /* set up communicator for test */
         if (params->numTasks > numTasksWorld) {
@@ -1911,7 +1947,12 @@ static void TestIoSys(IOR_test_t *test)
         if (rank == 0 && verbose >= VERBOSE_0)
                 ShowSetup(params);
 
-        startTime = GetTimeStamp();
+	    /* allocate some additional (wasted/application) memory and 
+           initialize it so that the pages are claimed 
+         */
+		memoryPerTask=AllocMemoryPerTask(params);
+
+		startTime = GetTimeStamp();
         maxTimeDuration = params->maxTimeDuration * 60;   /* convert to seconds */
 
 #if USE_UNDOC_OPT               /* fillTheFileSystem */
@@ -2336,6 +2377,11 @@ static void TestIoSys(IOR_test_t *test)
         }
         /* Sync with the tasks that did not participate in this test */
         MPI_CHECK(MPI_Barrier(MPI_COMM_WORLD), "barrier error");
+
+	if( memoryPerTask!=NULL )
+	{
+		free( memoryPerTask );
+	}
 }
 
 /*
