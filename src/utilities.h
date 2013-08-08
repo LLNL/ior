@@ -27,5 +27,6 @@ void DumpBuffer(void *, size_t);
 void SeedRandGen(MPI_Comm);
 void SetHints (MPI_Info *, char *);
 void ShowHints (MPI_Info *);
+int get_active_ost_list(const char* path, int *ost_count, int *ost_list);
 
 #endif  /* !_UTILITIES_H */

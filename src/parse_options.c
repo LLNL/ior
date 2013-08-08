@@ -115,6 +115,7 @@ static void CheckRunSettings(IOR_test_t *tests)
         }
 }
 
+
 /*
  * Set flags from commandline string/value pairs.
  */
@@ -263,6 +264,17 @@ void DecodeDirective(char *line, IOR_param_t *params)
                 ERR("ior was not compiled with Lustre support");
 #endif
                 params->lustre_ignore_locks = atoi(value);
+        } else if (strcasecmp(option, "lustreuseallosts") == 0) {
+#ifndef HAVE_LUSTRE_LUSTRE_USER_H
+                ERR("ior was not compiled with Lustre support");
+#ifndef HAVE_LUSTRE_LIBLUSTREAPI_H
+                ERR("ior was not compiled with Lustre API support");
+#endif
+                params->lustre_use_all_osts=-1;
+#else
+                nodesete(value,strlen(value),&(params->lustre_use_all_osts),params->lustre_ost_list);
+                params->lustre_set_striping = 1;
+#endif
         } else if (strcasecmp(option, "numtasks") == 0) {
                 params->numTasks = atoi(value);
 		RecalculateExpectedFileSize(params);
@@ -278,20 +290,33 @@ void DecodeDirective(char *line, IOR_param_t *params)
 
 /*
  * Parse a single line, which may contain multiple comma-seperated directives
+ * Patch : don't consider comma inside brackets
  */
 void ParseLine(char *line, IOR_param_t * test)
 {
-        char *start, *end;
+        char *start, *end, *endofline;
+        char *bracket;
 
         start = line;
+        endofline = start + strlen(start);
         do {
                 end = strchr(start, ',');
-                if (end != NULL)
+                if (end != NULL) {
                         *end = '\0';
+                        bracket = strchr(start,'[');
+                        if (bracket != NULL) {
+                                *end = ',';
+                                end = strchr(start,']');
+                                end += 1;
+                                *end = '\0';
+                        }
+                }
                 DecodeDirective(start, test);
-                start = end + 1;
+                if(end < endofline)
+                        start = end + 1;
+                else
+                        end = NULL;
         } while (end != NULL);
-
 }
 
 /*

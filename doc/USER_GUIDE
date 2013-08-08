@@ -341,6 +341,14 @@ LUSTRE-SPECIFIC:
 
   * lustreIgnoreLocks    - disable lustre range locking [0]
 
+  * lustreUseAllOsts     - set specifically OSTs as starting OST for the test file(s) [default=-1] :
+                              * -1 = let Lustre choose OST
+                              *  0 = use all available OSTs of Lustre file system as starting OSTs
+                              *  n = use the first n OSTs available of Lustre file system as starting OSTs
+                              *  [l-m,n] = use the specified OSTs as starting OSTs
+                           Note: if Lustre file system has 4 OSTs, the option "lustreStripeCount=1,lustreUseAllOsts=4"
+                                 will write one file one each OST
+
 
 ***********************
 * 5. VERBOSITY LEVELS *

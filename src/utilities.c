@@ -430,3 +430,129 @@ int uname(struct utsname *name)
         return 0;
 }
 #endif /* _WIN32 */
+
+/*
+ * Convert a string list into indexes
+ * ex: "[0,1,6-9,12,15-18]" gives the following array of integers [0,1,6,7,8,9,12,15,16,17,18]
+ */
+int nodesete(char *input, int input_len, int *count, int *list) {
+  int index=0;
+  char tmp1[1024];
+  char tmp2[1024];
+  char *ptmp;
+  int itmp;
+  int i;
+  int icount;
+
+  icount = 0;
+  if(input[index] != '[') {
+          *count = atoi(input);
+          list[index]=-1;
+          return 0;
+  } else {
+    index++;
+    ptmp = tmp1;
+    itmp = 0;
+    while((input[index] != '\0') && (index < input_len)) {
+      if(input[index] == ',') {
+        if(ptmp == tmp2) {
+          ptmp[itmp] = '\0';
+          for(i=atoi(tmp1);i<=atoi(tmp2);i++) {
+            list[icount]=i;
+            icount++;
+          }
+          ptmp = tmp1;
+          itmp = 0;
+        } else {
+          ptmp[itmp] = '\0';
+          list[icount]=atoi(tmp1);
+          (icount)++;
+          itmp = 0;
+        }
+        index++;
+      }
+      if(input[index] == ']') {
+        if(ptmp == tmp2) {
+          ptmp[itmp] = '\0';
+          for(i=atoi(tmp1);i<=atoi(tmp2);i++) {
+            list[icount]=i;
+            icount++;
+          }
+          ptmp = tmp1;
+          itmp = 0;
+        } else {
+          ptmp[itmp] = '\0';
+          list[icount]=atoi(tmp1);
+          (icount)++;
+          itmp = 0;
+        }
+        break;
+      }
+      if(input[index] == '-') {
+        ptmp[itmp] = '\0';
+        ptmp = tmp2;
+        itmp = 0;
+        index++;
+      }
+      ptmp[itmp] = input[index];
+      index++;
+      itmp++;
+    }
+    *count = icount;
+  }
+  return 0;
+}
+
+#ifdef HAVE_LUSTRE_LIBLUSTREAPI_H
+#include <lustre/liblustreapi.h>
+#include <unistd.h>
+#include <sys/types.h>
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
+int get_active_ost_list(const char* path, int *ost_count, int *ost_list)
+{
+  char mntdir[PATH_MAX] = "";
+  char fsname[PATH_MAX] = "";
+  char targetobd[PATH_MAX] = "";
+  struct obd_uuid name;
+  char buf[1024];
+  int fd;
+  FILE *fp;
+  int rc = 0;
+  int index;
+  char uuid[sizeof(struct obd_uuid)];
+
+  fd = open(path, O_RDONLY);
+  if(fd == 0) {
+      rc = -errno;
+      llapi_error(LLAPI_MSG_ERROR, rc, "error: opening '%s'", path);
+      return rc;
+  }
+  rc=llapi_file_fget_lov_uuid(fd, &name);
+  if (rc)
+    return rc;
+  close(fd);
+
+  snprintf(targetobd,sizeof(targetobd),"/proc/fs/lustre/lov/%s/target_obd",name.uuid);
+
+  fp = fopen(targetobd,"r");
+  if (fp == NULL) {
+    rc = -errno;
+    llapi_error(LLAPI_MSG_ERROR, rc, "error: opening '%s'", targetobd);
+    return rc;
+  }
+
+  *ost_count = 0;
+  while (fgets(buf,sizeof(buf), fp) != NULL) {
+    sscanf(buf, "%d: %s", &index, uuid);
+    if(ost_list != NULL) {
+      ost_list[*ost_count]=index;
+    }
+    (*ost_count)++;
+  }
+  fclose(fp);
+  return rc;
+};
+#endif
+

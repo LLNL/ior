@@ -35,6 +35,7 @@
 #include "ior.h"
 #include "aiori.h"
 #include "iordef.h"
+#include "utilities.h"
 
 #ifndef   open64                /* necessary for TRU64 -- */
 #define open64  open            /* unlikely, but may pose */
@@ -58,6 +59,7 @@ static void POSIX_Delete(char *, IOR_param_t *);
 static void POSIX_SetVersion(IOR_param_t *);
 static void POSIX_Fsync(void *, IOR_param_t *);
 static IOR_offset_t POSIX_GetFileSize(IOR_param_t *, MPI_Comm, char *);
+
 
 /************************** D E C L A R A T I O N S ***************************/
 
@@ -98,6 +100,11 @@ static void *POSIX_Create(char *testFileName, IOR_param_t * param)
 {
         int fd_oflag = O_BINARY;
         int *fd;
+#ifdef HAVE_LUSTRE_LUSTRE_USER_H
+        char path[PATH_MAX] = "";
+        int ost_count = 0;
+        int ost_list[MAX_OST_COUNT];
+#endif
 
         fd = (int *)malloc(sizeof(int));
         if (fd == NULL)
@@ -123,7 +130,30 @@ static void *POSIX_Create(char *testFileName, IOR_param_t * param)
                         /* Setup Lustre IOCTL striping pattern structure */
                         opts.lmm_magic = LOV_USER_MAGIC;
                         opts.lmm_stripe_size = param->lustre_stripe_size;
-                        opts.lmm_stripe_offset = param->lustre_start_ost;
+                        if(param->lustre_use_all_osts == -1){
+                                opts.lmm_stripe_offset = param->lustre_start_ost;
+                        }
+#ifdef HAVE_LUSTRE_LIBLUSTREAPI_H
+                        /* Set lustre_start_ost if asked */
+                        else {
+                                /* Get information about available FS's OSTs */
+                                getcwd(path, sizeof(path));
+                                get_active_ost_list(path,&ost_count,ost_list);
+                                /* In the case where all OSTs will be used */
+                                if(param->lustre_use_all_osts == 0) {
+                                        opts.lmm_stripe_offset = ost_list[rank%ost_count];
+                                } else {
+                                        /* Only a number of OSTs is specified */
+                                        if(param->lustre_ost_list[0] < 0) {
+                                                opts.lmm_stripe_offset = ost_list[rank%param->lustre_use_all_osts];
+                                        }
+                                        /* a list of OSTs is specified */
+                                        else {
+                                                opts.lmm_stripe_offset = param->lustre_ost_list[rank%param->lustre_use_all_osts];
+                                        }
+                                }
+                        }
+#endif
                         opts.lmm_stripe_count = param->lustre_stripe_count;
 
                         /* File needs to be opened O_EXCL because we cannot set
@@ -347,3 +377,5 @@ static IOR_offset_t POSIX_GetFileSize(IOR_param_t * test, MPI_Comm testComm,
 
         return (aggFileSizeFromStat);
 }
+
+

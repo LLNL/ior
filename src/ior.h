@@ -125,6 +125,8 @@ typedef struct
     int lustre_start_ost;
     int lustre_set_striping;         /* flag that we need to set lustre striping */
     int lustre_ignore_locks;
+    int lustre_use_all_osts;
+    int lustre_ost_list[MAX_OST_COUNT];    
 
     int id;                          /* test's unique ID */
     int intraTestBarriers;           /* barriers between open/op and op/close */
