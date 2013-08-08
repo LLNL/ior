@@ -7,9 +7,14 @@ ior_SOURCES = ior.c utilities.c parse_options.c
 ior_SOURCES += ior.h utilities.h parse_options.h aiori.h iordef.h
 ior_LDADD =
 
+if USE_LUSTREAPI
+ior_LDADD += -llustreapi
+endif
+
 if USE_POSIX_AIORI
 ior_SOURCES += aiori-POSIX.c
 endif
+
 if USE_MPIIO_AIORI
 ior_SOURCES += aiori-MPIIO.c
 endif

@@ -44,6 +44,20 @@ AS_IF([test "x$with_lustre" != xno], [
                         AC_MSG_FAILURE([--with-lustre was given, <lustre/lustre_user.h> not found])
                 fi
         ])
+        AC_CHECK_HEADERS([lustre/liblustreapi.h], [AC_DEFINE([HAVE_LUSTREAPI],[1],[Have LustreAPI]) with_lustreapi=true], [
+                if test "x$with_lustre" != xcheck; then
+                        AC_MSG_ERROR([--with-lustre was given, <lustre/liblustreapi.h> not found])
+                fi
+        ])
+
+])
+AM_CONDITIONAL([USE_LUSTRE], [test x$with_lustre = xyes])
+AM_COND_IF([USE_LUSTRE],[
+        AC_DEFINE([USE_LUSTRE], [], [Build LUSTRE support])
+])
+AM_CONDITIONAL([USE_LUSTREAPI], [test x$with_lustreapi = xtrue])
+AM_COND_IF([USE_LUSTREAPI],[
+        AC_DEFINE([USE_LUSTREAPI], [], [Build LUSTRE support])
 ])
 
 # POSIX IO support

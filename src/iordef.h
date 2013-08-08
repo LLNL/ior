@@ -108,6 +108,9 @@ extern int verbose;                            /* verbose output */
 #ifndef PATH_MAX
 #define PATH_MAX           4096
 #endif
+#ifndef MAX_OST_COUNT
+#define MAX_OST_COUNT      1024
+#endif
 
 #define DELIMITERS         " \t\r\n="          /* ReadScript() */
 #define FILENAME_DELIMITER '@'                 /* ParseFileName() */

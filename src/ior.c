@@ -187,6 +187,7 @@ void init_IOR_Param_t(IOR_param_t * p)
         p->testComm = MPI_COMM_WORLD;
         p->setAlignment = 1;
         p->lustre_start_ost = -1;
+        p->lustre_use_all_osts = -1;
 }
 
 /*
@@ -1460,7 +1461,7 @@ static void ShowTestInfo(IOR_param_t *params)
  */
 static void ShowSetup(IOR_param_t *params)
 {
-
+        int i;
         if (strcmp(params->debug, "") != 0) {
                 printf("\n*** DEBUG MODE ***\n");
                 printf("*** %s ***\n\n", params->debug);
@@ -1527,6 +1528,22 @@ static void ShowSetup(IOR_param_t *params)
                 } else {
                         printf("\t      stripe count = %d\n",
                                params->lustre_stripe_count);
+                }
+                if (params->lustre_use_all_osts == -1) {
+                        printf("\t    scatter to OSTs= false\n");
+                } else {
+                        if(params->lustre_use_all_osts == 0) {
+                                printf("\t   scatter to OSTs = all\n");
+                        } else {
+                                printf("\t   scatter to OSTs = %d\n",params->lustre_use_all_osts);
+                                if(params->lustre_ost_list[0] >= 0) {
+                                        printf("\t    OSTs list      = [%d",params->lustre_ost_list[0]);
+                                        for(i=1;i<params->lustre_use_all_osts;i++) {
+                                                printf(",%d",params->lustre_ost_list[i]);
+                                        }
+                                        printf("]");
+                                }
+                        }
                 }
         }
 #endif /* HAVE_LUSTRE_LUSTRE_USER_H */
