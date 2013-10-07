@@ -206,6 +206,8 @@ static void *MPIIO_Open(char *testFileName, IOR_param_t * param)
                                             (MPI_Info) MPI_INFO_NULL),
                           "cannot set file view");
         }
+        if (mpiHints != MPI_INFO_NULL)
+                MPI_CHECK(MPI_Info_free(&mpiHints), "MPI_Info_free failed");
         return ((void *)fd);
 }
 
