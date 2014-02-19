@@ -1254,6 +1254,12 @@ static void PrintRemoveTiming(double start, double finish, int rep)
 static void RemoveFile(char *testFileName, int filePerProc, IOR_param_t * test)
 {
         int tmpRankOffset;
+        char *strippedFileName;
+
+        strippedFileName = strchr(testFileName, ':');
+        if (strippedFileName > testFileName + 1)
+                strippedFileName = strippedFileName + 1;
+
         if (filePerProc) {
                 /* in random tasks, delete own file */
                 if (test->reorderTasksRandom == TRUE) {
@@ -1261,7 +1267,7 @@ static void RemoveFile(char *testFileName, int filePerProc, IOR_param_t * test)
                         rankOffset = 0;
                         GetTestFileName(testFileName, test);
                 }
-                if (access(testFileName, F_OK) == 0) {
+                if (access(strippedFileName, F_OK) == 0) {
                         backend->delete(testFileName, test);
                 }
                 if (test->reorderTasksRandom == TRUE) {
@@ -1269,7 +1275,7 @@ static void RemoveFile(char *testFileName, int filePerProc, IOR_param_t * test)
                         GetTestFileName(testFileName, test);
                 }
         } else {
-                if ((rank == 0) && (access(testFileName, F_OK) == 0)) {
+                if ((rank == 0) && (access(strippedFileName, F_OK) == 0)) {
                         backend->delete(testFileName, test);
                 }
         }
