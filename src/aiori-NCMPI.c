@@ -62,8 +62,8 @@ static IOR_offset_t NCMPI_GetFileSize(IOR_param_t *, MPI_Comm, char *);
 
 ior_aiori_t ncmpi_aiori = {
         "NCMPI",
-        POSIX_Init,
-        POSIX_Finalize,
+        NULL, /* no-op init, finalize */
+        NULL,
         NCMPI_Create,
         NCMPI_Open,
         NCMPI_Xfer,

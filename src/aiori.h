@@ -78,9 +78,6 @@ ior_aiori_t ncmpi_aiori;
 IOR_offset_t MPIIO_GetFileSize(IOR_param_t * test, MPI_Comm testComm,
                                char *testFileName);
 
-void POSIX_Init(IOR_param_t *test);
-void POSIX_Finalize(IOR_param_t *test);
-
 int POSIX_Access(char *testFileName, int mode);
 int POSIX_Mkdir(char *dir, int mode);
 

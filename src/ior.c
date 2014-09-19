@@ -1973,7 +1973,8 @@ static void TestIoSys(IOR_test_t *test)
         hog_buf = HogMemory(params);
 
         /* do backend-specific initialization */
-        backend->init(params);
+        if (backend->init)
+                backend->init(params);
 
         startTime = GetTimeStamp();
 
@@ -2233,7 +2234,8 @@ static void TestIoSys(IOR_test_t *test)
         }
 
         /* do backend-specific finalization */
-        backend->finalize(params);
+        if (backend->finalize)
+                backend->finalize(params);
 
         MPI_CHECK(MPI_Comm_free(&testComm), "MPI_Comm_free() error");
 
