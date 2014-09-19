@@ -60,6 +60,7 @@ typedef struct ior_aiori {
         void (*set_version)(IOR_param_t *);
         void (*fsync)(void *, IOR_param_t *);
         IOR_offset_t (*get_file_size)(IOR_param_t *, MPI_Comm, char *);
+        int  (*access)(char *, int mode);
 } ior_aiori_t;
 
 ior_aiori_t posix_aiori;
@@ -69,5 +70,7 @@ ior_aiori_t ncmpi_aiori;
 
 IOR_offset_t MPIIO_GetFileSize(IOR_param_t * test, MPI_Comm testComm,
                                char *testFileName);
+
+int POSIX_Access(char *testFileName, int mode);
 
 #endif /* not _AIORI_H */

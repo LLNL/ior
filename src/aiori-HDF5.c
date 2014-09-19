@@ -105,7 +105,8 @@ ior_aiori_t hdf5_aiori = {
         HDF5_Delete,
         HDF5_SetVersion,
         HDF5_Fsync,
-        HDF5_GetFileSize
+        HDF5_GetFileSize,
+        POSIX_Access
 };
 
 static hid_t xferPropList;      /* xfer property list */

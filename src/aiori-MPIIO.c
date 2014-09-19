@@ -53,7 +53,8 @@ ior_aiori_t mpiio_aiori = {
         MPIIO_Delete,
         MPIIO_SetVersion,
         MPIIO_Fsync,
-        MPIIO_GetFileSize
+        MPIIO_GetFileSize,
+        POSIX_Access
 };
 
 /***************************** F U N C T I O N S ******************************/

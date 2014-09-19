@@ -69,7 +69,8 @@ ior_aiori_t ncmpi_aiori = {
         NCMPI_Delete,
         NCMPI_SetVersion,
         NCMPI_Fsync,
-        NCMPI_GetFileSize
+        NCMPI_GetFileSize,
+        POSIX_Access
 };
 
 /***************************** F U N C T I O N S ******************************/
