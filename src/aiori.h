@@ -67,6 +67,7 @@ typedef struct ior_aiori {
         /* these functions are expected to behave identically to their POSIX
          * equivalents */
         int  (*access)(char *, int mode);
+        int  (*mkdir)(char *, int mode);
 } ior_aiori_t;
 
 ior_aiori_t posix_aiori;
@@ -77,9 +78,10 @@ ior_aiori_t ncmpi_aiori;
 IOR_offset_t MPIIO_GetFileSize(IOR_param_t * test, MPI_Comm testComm,
                                char *testFileName);
 
-int POSIX_Access(char *testFileName, int mode);
-
 void POSIX_Init(IOR_param_t *test);
 void POSIX_Finalize(IOR_param_t *test);
+
+int POSIX_Access(char *testFileName, int mode);
+int POSIX_Mkdir(char *dir, int mode);
 
 #endif /* not _AIORI_H */

@@ -1084,7 +1084,7 @@ static char *PrependDir(IOR_param_t * test, char *rootDir)
 
         /* dir doesn't exist, so create */
         if (backend->access(dir, F_OK) != 0) {
-                if (mkdir(dir, S_IRWXU) < 0) {
+                if (backend->mkdir(dir, S_IRWXU) < 0) {
                         ERR("cannot create directory");
                 }
 

@@ -72,7 +72,8 @@ ior_aiori_t ncmpi_aiori = {
         NCMPI_SetVersion,
         NCMPI_Fsync,
         NCMPI_GetFileSize,
-        POSIX_Access
+        POSIX_Access,
+        POSIX_Mkdir
 };
 
 /***************************** F U N C T I O N S ******************************/

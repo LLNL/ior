@@ -56,7 +56,8 @@ ior_aiori_t mpiio_aiori = {
         MPIIO_SetVersion,
         MPIIO_Fsync,
         MPIIO_GetFileSize,
-        POSIX_Access
+        POSIX_Access,
+        POSIX_Mkdir
 };
 
 /***************************** F U N C T I O N S ******************************/
