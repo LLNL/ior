@@ -51,6 +51,10 @@
 
 typedef struct ior_aiori {
         char *name;
+        /* init and finalizes should be called exactly once during a program
+         * run */
+        void (*init)(IOR_param_t *);
+        void (*finalize)(IOR_param_t *);
         void *(*create)(char *, IOR_param_t *);
         void *(*open)(char *, IOR_param_t *);
         IOR_offset_t (*xfer)(int, void *, IOR_size_t *,
@@ -60,6 +64,8 @@ typedef struct ior_aiori {
         void (*set_version)(IOR_param_t *);
         void (*fsync)(void *, IOR_param_t *);
         IOR_offset_t (*get_file_size)(IOR_param_t *, MPI_Comm, char *);
+        /* these functions are expected to behave identically to their POSIX
+         * equivalents */
         int  (*access)(char *, int mode);
 } ior_aiori_t;
 
@@ -72,5 +78,8 @@ IOR_offset_t MPIIO_GetFileSize(IOR_param_t * test, MPI_Comm testComm,
                                char *testFileName);
 
 int POSIX_Access(char *testFileName, int mode);
+
+void POSIX_Init(IOR_param_t *test);
+void POSIX_Finalize(IOR_param_t *test);
 
 #endif /* not _AIORI_H */

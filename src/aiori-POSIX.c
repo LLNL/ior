@@ -70,6 +70,8 @@ static IOR_offset_t POSIX_GetFileSize(IOR_param_t *, MPI_Comm, char *);
 
 ior_aiori_t posix_aiori = {
         "POSIX",
+        POSIX_Init,
+        POSIX_Finalize,
         POSIX_Create,
         POSIX_Open,
         POSIX_Xfer,
@@ -455,4 +457,16 @@ static IOR_offset_t POSIX_GetFileSize(IOR_param_t * test, MPI_Comm testComm,
 
 int POSIX_Access(char *testFileName, int mode){
         return access(testFileName, mode);
+}
+
+void POSIX_Init(IOR_param_t *test) {
+        /* no-op at the moment, though perhaps some of the POSIX-related setup
+         * code (such as mkdir's for the uniqueDir option) can go here in the
+         * future */
+}
+
+void POSIX_Finalize(IOR_param_t *test) {
+        /* no-op at the moment, though perhaps some of the POSIX-related
+         * teardown code (deleting test files/directories) can go here in the
+         * future */
 }

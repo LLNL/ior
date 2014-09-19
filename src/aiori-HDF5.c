@@ -98,6 +98,8 @@ static IOR_offset_t HDF5_GetFileSize(IOR_param_t *, MPI_Comm, char *);
 
 ior_aiori_t hdf5_aiori = {
         "HDF5",
+        POSIX_Init,
+        POSIX_Finalize,
         HDF5_Create,
         HDF5_Open,
         HDF5_Xfer,
