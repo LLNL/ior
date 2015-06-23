@@ -301,7 +301,7 @@ IOR_offset_t StringToBytes(char *size_str)
 void ShowFileSystemSize(char *fileSystem)
 {
 #ifndef _WIN32                  /* FIXME */
-        char realPath[PATH_MAX];
+        char *realPath;
         char *fileSystemUnitStr;
         long long int totalFileSystemSize;
         long long int freeFileSystemSize;
@@ -352,7 +352,8 @@ void ShowFileSystemSize(char *fileSystem)
             (1 - ((double)freeInodes / (double)totalInodes)) * 100;
 
         /* show results */
-        if (realpath(fileSystem, realPath) == NULL) {
+	realPath = realpath(fileSystem, NULL);
+        if (realPath == NULL) {
                 ERR("unable to use realpath()");
         }
         fprintf(stdout, "Path: %s\n", realPath);
