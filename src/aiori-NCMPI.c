@@ -196,7 +196,7 @@ static IOR_offset_t NCMPI_Xfer(int access, void *fd, IOR_size_t * buffer,
                     (IOR_offset_t) ((rank + rankOffset) % param->numTasks)
                     * param->blockSize;
         }
-        if ((int)(param->offset - segmentPosition) == 0) {
+        if ((param->offset - segmentPosition) == (IOR_offset_t)0) {
                 startDataSet = TRUE;
                 /*
                  * this toggle is for the read check operation, which passes through
