@@ -196,7 +196,7 @@ static IOR_offset_t NCMPI_Xfer(int access, void *fd, IOR_size_t * buffer,
                     (IOR_offset_t) ((rank + rankOffset) % param->numTasks)
                     * param->blockSize;
         }
-        if ((int)(param->offset - segmentPosition) == 0) {
+        if ((param->offset - segmentPosition) == (IOR_offset_t)0) {
                 startDataSet = TRUE;
                 /*
                  * this toggle is for the read check operation, which passes through
@@ -279,24 +279,24 @@ static IOR_offset_t NCMPI_Xfer(int access, void *fd, IOR_size_t * buffer,
                 if (param->collective) {
                         NCMPI_CHECK(ncmpi_put_vara_all
                                     (*(int *)fd, var_id, offset, bufSize,
-                                     bufferPtr, length, MPI_BYTE),
+                                     bufferPtr, length, MPI_SIGNED_CHAR),
                                     "cannot write to data set");
                 } else {
                         NCMPI_CHECK(ncmpi_put_vara
                                     (*(int *)fd, var_id, offset, bufSize,
-                                     bufferPtr, length, MPI_BYTE),
+                                     bufferPtr, length, MPI_SIGNED_CHAR),
                                     "cannot write to data set");
                 }
         } else {                /* READ or CHECK */
                 if (param->collective == TRUE) {
                         NCMPI_CHECK(ncmpi_get_vara_all
                                     (*(int *)fd, var_id, offset, bufSize,
-                                     bufferPtr, length, MPI_BYTE),
+                                     bufferPtr, length, MPI_SIGNED_CHAR),
                                     "cannot read from data set");
                 } else {
                         NCMPI_CHECK(ncmpi_get_vara
                                     (*(int *)fd, var_id, offset, bufSize,
-                                     bufferPtr, length, MPI_BYTE),
+                                     bufferPtr, length, MPI_SIGNED_CHAR),
                                     "cannot read from data set");
                 }
         }
