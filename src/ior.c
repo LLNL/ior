@@ -2286,14 +2286,12 @@ static void ValidTests(IOR_param_t * test)
                 ERR("alignment must be non-negative integer");
         if (test->transferSize < 0)
                 ERR("transfer size must be non-negative integer");
-        if (test->transferSize == 0) {
+        if (test->transferSize == 0)
                 ERR("test will not complete with zero transfer size");
-        } else {
-                if ((test->blockSize % test->transferSize) != 0)
-                        ERR("block size must be a multiple of transfer size");
-        }
         if (test->blockSize < test->transferSize)
                 ERR("block size must not be smaller than transfer size");
+        if ((test->blockSize % test->transferSize) != 0)
+                ERR("block size must be a multiple of transfer size");
         if ((strcmp(test->api, "MPIIO") == 0)
             && (test->blockSize < sizeof(IOR_size_t)
                 || test->transferSize < sizeof(IOR_size_t)))
