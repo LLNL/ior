@@ -1083,14 +1083,15 @@ static char *PrependDir(IOR_param_t * test, char *rootDir)
         sprintf(dir, "%s%d", dir, (rank + rankOffset) % test->numTasks);
 
         /* dir doesn't exist, so create */
-        if (access(dir, F_OK) != 0) {
-                if (mkdir(dir, S_IRWXU) < 0) {
+        if (backend->access(dir, F_OK) != 0) {
+                if (backend->mkdir(dir, S_IRWXU) < 0) {
                         ERR("cannot create directory");
                 }
 
                 /* check if correct permissions */
-        } else if (access(dir, R_OK) != 0 || access(dir, W_OK) != 0 ||
-                   access(dir, X_OK) != 0) {
+        } else if (backend->access(dir, R_OK) != 0 ||
+                   backend->access(dir, W_OK) != 0 ||
+                   backend->access(dir, X_OK) != 0) {
                 ERR("invalid directory permissions");
         }
 
@@ -1261,7 +1262,7 @@ static void RemoveFile(char *testFileName, int filePerProc, IOR_param_t * test)
                         rankOffset = 0;
                         GetTestFileName(testFileName, test);
                 }
-                if (access(testFileName, F_OK) == 0) {
+                if (backend->access(testFileName, F_OK) == 0) {
                         backend->delete(testFileName, test);
                 }
                 if (test->reorderTasksRandom == TRUE) {
@@ -1269,7 +1270,7 @@ static void RemoveFile(char *testFileName, int filePerProc, IOR_param_t * test)
                         GetTestFileName(testFileName, test);
                 }
         } else {
-                if ((rank == 0) && (access(testFileName, F_OK) == 0)) {
+                if ((rank == 0) && (backend->access(testFileName, F_OK) == 0)) {
                         backend->delete(testFileName, test);
                 }
         }
@@ -1971,6 +1972,10 @@ static void TestIoSys(IOR_test_t *test)
 
         hog_buf = HogMemory(params);
 
+        /* do backend-specific initialization */
+        if (backend->init)
+                backend->init(params);
+
         startTime = GetTimeStamp();
 
         /* loop over test iterations */
@@ -2227,6 +2232,10 @@ static void TestIoSys(IOR_test_t *test)
                 params->errorFound = FALSE;
                 rankOffset = 0;
         }
+
+        /* do backend-specific finalization */
+        if (backend->finalize)
+                backend->finalize(params);
 
         MPI_CHECK(MPI_Comm_free(&testComm), "MPI_Comm_free() error");
 

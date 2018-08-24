@@ -46,6 +46,8 @@ static void MPIIO_Fsync(void *, IOR_param_t *);
 
 ior_aiori_t mpiio_aiori = {
         "MPIIO",
+        NULL, /* no-op init, finalize */
+        NULL,
         MPIIO_Create,
         MPIIO_Open,
         MPIIO_Xfer,
@@ -53,7 +55,9 @@ ior_aiori_t mpiio_aiori = {
         MPIIO_Delete,
         MPIIO_SetVersion,
         MPIIO_Fsync,
-        MPIIO_GetFileSize
+        MPIIO_GetFileSize,
+        POSIX_Access,
+        POSIX_Mkdir
 };
 
 /***************************** F U N C T I O N S ******************************/

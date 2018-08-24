@@ -70,6 +70,8 @@ static IOR_offset_t POSIX_GetFileSize(IOR_param_t *, MPI_Comm, char *);
 
 ior_aiori_t posix_aiori = {
         "POSIX",
+        NULL, /* no-op init, finalize */
+        NULL,
         POSIX_Create,
         POSIX_Open,
         POSIX_Xfer,
@@ -77,7 +79,9 @@ ior_aiori_t posix_aiori = {
         POSIX_Delete,
         POSIX_SetVersion,
         POSIX_Fsync,
-        POSIX_GetFileSize
+        POSIX_GetFileSize,
+        POSIX_Access,
+        POSIX_Mkdir
 };
 
 /***************************** F U N C T I O N S ******************************/
@@ -450,4 +454,12 @@ static IOR_offset_t POSIX_GetFileSize(IOR_param_t * test, MPI_Comm testComm,
         }
 
         return (aggFileSizeFromStat);
+}
+
+int POSIX_Access(char *testFileName, int mode){
+        return access(testFileName, mode);
+}
+
+int POSIX_Mkdir(char *dir, int mode){
+        return mkdir(dir, mode);
 }
