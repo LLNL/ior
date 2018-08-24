@@ -703,6 +703,7 @@ static void DisplayUsage(char **argv)
                 " -k    keepFile -- don't remove the test file(s) on program exit",
                 " -K    keepFileWithError  -- keep error-filled file(s) after data-checking",
                 " -l    storeFileOffset -- use file offset as stored signature",
+		" -L N  interOpDelay -- delay between operations in seconds",
                 " -m    multiFile -- use number of reps (-i) for multiple file count",
                 " -M N  memoryPerNode -- hog memory on the node  (e.g.: 2g, 75%)",
                 " -n    noFill -- no fill in HDF5 file creation",
@@ -1561,6 +1562,7 @@ static void ShowTest(IOR_param_t * test)
         fprintf(stdout, "\t%s=%d\n", "repetitions", test->repetitions);
         fprintf(stdout, "\t%s=%d\n", "multiFile", test->multiFile);
         fprintf(stdout, "\t%s=%d\n", "interTestDelay", test->interTestDelay);
+	fprintf(stdout, "\t%s=%d\n", "interOpDelay", test->interOpDelay);
         fprintf(stdout, "\t%s=%d\n", "fsync", test->fsync);
         fprintf(stdout, "\t%s=%d\n", "fsYncperwrite", test->fsyncPerWrite);
         fprintf(stdout, "\t%s=%d\n", "useExistingTestFile",
@@ -2579,6 +2581,9 @@ static IOR_offset_t WriteOrRead(IOR_param_t * test, void *fd, int access)
                                   test, transfer, test->blockSize, &amtXferred,
                                   &transferCount, access, &errors);
                 }
+                
+                DelaySecs(test->interOpDelay);
+		
                 dataMoved += amtXferred;
                 pairCnt++;
 

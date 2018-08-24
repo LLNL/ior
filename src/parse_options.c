@@ -154,6 +154,8 @@ void DecodeDirective(char *line, IOR_param_t *params)
                 params->repetitions = atoi(value);
         } else if (strcasecmp(option, "intertestdelay") == 0) {
                 params->interTestDelay = atoi(value);
+        } else if (strcasecmp(option, "interopdelay") == 0) {
+                params->interOpDelay = atoi(value);
         } else if (strcasecmp(option, "readfile") == 0) {
                 params->readFile = atoi(value);
         } else if (strcasecmp(option, "writefile") == 0) {
@@ -405,7 +407,7 @@ IOR_test_t *ReadConfigScript(char *scriptName)
 IOR_test_t *ParseCommandLine(int argc, char **argv)
 {
         static const char *opts =
-          "a:A:b:BcCd:D:eEf:FgG:hHi:Ij:J:kKlmM:nN:o:O:pPqQ:rRs:St:T:uU:vVwWxX:YzZ";
+          "a:A:b:BcCd:D:eEf:FgG:hHi:Ij:J:kKlL:mM:nN:o:O:pPqQ:rRs:St:T:uU:vVwWxX:YzZ";
         int c, i;
         static IOR_test_t *tests = NULL;
 
@@ -501,6 +503,9 @@ IOR_test_t *ParseCommandLine(int argc, char **argv)
                         break;
                 case 'l':
                         initialTestParams.storeFileOffset = TRUE;
+                        break;
+                case 'L':
+                        initialTestParams.interOpDelay = atoi(optarg);
                         break;
 		case 'M':
                         initialTestParams.memoryPerNode =
